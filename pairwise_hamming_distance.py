@@ -38,7 +38,12 @@ def main(argv):
 	# Get the subset of sequences
 	iterbegin = int(argv[1])
 	iterend = int(argv[2])
-	seqSub = seqs[iterbegin - 1 : (iterbegin + iterend - 1)]
+
+	# Check that the subset are within length
+	if iterbegin + iterend - 1 < Ntotal_seqs:
+		seqSub = seqs[iterbegin - 1 : (iterbegin + iterend - 1)]
+	else:
+		seqSub = seqs[iterbegin - 1:]
 
 	# Build the index of pairs
 	I = xrange(len(seqSub))
@@ -48,12 +53,18 @@ def main(argv):
 	D = np.zeros((len(seqSub),len(seqs)),dtype=np.int)
 	# Iterate through pariwise lists using itertools
 	for i, seqPair in izip(count(), product(seqSub,seqs)):
-		print seqPair, index[i]
 		ind = index[i]
-		if ind[1] < ind[0]: # skip one set of calculations (and also diagonals)
-			continue
-		D[ind[0],ind[1]] = hamming_distance(seqPair[0],seqPair[1])
+		# If along the diagonal, put 100 instead (to not interfere with min)
+		if (ind[0] + iterbegin-1) == ind[1]:
+			D[ind[0],ind[1]] = 100
+		else:
+			D[ind[0],ind[1]] = hamming_distance(seqPair[0],seqPair[1])
 	
+	# Take the minimum distance except along diagonal (which will never be min)
+	Dargmin = D.argmin(axis=1)
+	D = D.min(axis=1)
+	D = np.vstack( (D,Dargmin) ).T
+
 	outputfile = argv[3]
 	np.savetxt(outputfile, D.astype(np.int), fmt='%i', delimiter=',')
 
@@ -61,8 +72,5 @@ def hamming_distance(s1,s2):
 	return sum(x != y for x,y in zip(s1,s2))
 
 if __name__ == '__main__':
-	start = timeit.timeit()
 	main(sys.argv[1:])
-	end = timeit.timeit()
-	print end-start
 	
