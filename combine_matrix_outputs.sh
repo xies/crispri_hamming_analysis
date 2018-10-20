@@ -2,5 +2,8 @@
 
 OUT_DIR="/home/xies/data/crispri_hamming/outputs"
 
-ls ${OUT_DIR} | sort --version-sort
-echo $filelist
+# Generate numerically sorted filelist
+filelist=$(ls ${OUT_DIR}/*.csv | sort --version-sort)
+echo ${filelist}
+
+cat ${filelist} >> ${OUT_DIR}/big_distance_matrix.csv
