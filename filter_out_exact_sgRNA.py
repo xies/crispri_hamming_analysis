@@ -7,43 +7,40 @@ Created on Fri Oct 19 15:19:45 2018
 """
 
 import numpy as np
-import matplotlib.pylab as plt
+import re
 import pandas as pd
-from Bio import SeqIO
+from Bio import SeqIO, SeqRecord
 from itertools import count, izip
 
 # Load ChIP peaks
-filename = '/data/ForMimi/AllSgRNAsOct4'
+filename = '/data/crispri_hamming/oct4_chip_flanking.fa'
 seqs = [rec for rec in SeqIO.parse(filename,'fasta')]
+Npeaks = len(seqs)
 
-zeros = np.where(D == 0)[0]
-matches = Dists[D == 0,1].astype(np.int)
+# Load output of Ali's GG-finding file
+guide_seqs = []
+repeats = []
+for rec in seqs:
+    # Use positive lookahead to search through all matches
+    pam_sites = [m.start() for m in re.finditer('(?=GG)',str(rec.seq))]
+    # Filter through ones that have 20 flanking positions
+    pam_sites = [s for s in pam_sites if s > 19]
+    for s in pam_sites:
+        peak_locus = get_genomic_locus_begin(rec.name)
+        chr_name = get_chromosome_name(rec.name)
+        new_locus = peak_locus + s - 21
+        newID = ':'.join((chr_name,str(new_locus)))
+        # Check for unique entries
+        if newID not in [guide.id for guide in guide_seqs]:
+            # Generate a SeqRecord
+            guide_seqs.append( SeqRecord.SeqRecord(
+                    seq = rec.seq[s-21:s-1],
+                    id = newID,
+                    name = rec.name) )
+        else:
+            repeats.append( SeqRecord.SeqRecord(
+                    seq = rec.seq[s-21:s-1],
+                    id = newID,
+                    name = rec.name) )
 
-df = []
-for (i, matching_pair) in izip(count(), izip(zeros,matches)):
-    df.append((i,matching_pair[0],matching_pair[1],
-               str(seqs[matching_pair[0]].seq), str(seqs[matching_pair[1]].seq) ))
-df = pd.DataFrame(df)
-df.to_csv('/data/crispri_hamming/exact_matches.txt',sep='\t')
-
-
-
-D = Dists[:,0]
-index = 0
-
-#with open(filename, 'rb') as f:
-#    lines = f.readlines()
-#    for l in lines:
-#        myarray = np.fromstring(l, dtype=float, sep=',')
-#        
-#        D[index] = myarray[index + 1:].min()
-#        
-#        index += 1
-        
-#min_distances = D.min()
-
-bins = range( int(D.max()) +1)
-plt.hist(D,bins=bins, normed=True, cumulative=True, histtype='step',align='mid')
-plt.xlabel('Minimum mismatches')
-plt.ylabel('CDF')
-
+SeqIO.write(guide_seqs,'/data/crispri_hamming/sgRNA_unique.fasta','fasta')
