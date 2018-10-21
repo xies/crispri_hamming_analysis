@@ -30,11 +30,14 @@ for rec in seqs:
         chr_name = get_chromosome_name(rec.name)
         new_locus = peak_locus + s - 21
         newID = ':'.join((chr_name,str(new_locus)))
+        sequence = rec.seq[s-21:s-1]
+        if len(sequence) == 0:
+            break
         # Check for unique entries
         if newID not in [guide.id for guide in guide_seqs]:
             # Generate a SeqRecord
             guide_seqs.append( SeqRecord.SeqRecord(
-                    seq = rec.seq[s-21:s-1],
+                    seq = sequence,
                     id = newID,
                     name = rec.name) )
         else:
