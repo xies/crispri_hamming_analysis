@@ -4,7 +4,7 @@ set -e
 #Manage the batch SLURM submission for pairwise Hamming distance analysis
 
 begin=1
-total_seqs=19172
+total_seqs=16226
 Nseqperiter=1000
 
 JOB=pairwise_hamming
@@ -55,5 +55,5 @@ EOF
 for (( i=$begin; i<=$total_seqs; i=i+$Nseqperiter ))
 do
 	echo $i
-	submit sgRNA_oct4.fasta ${i}
+	submit sgRNA_unique.fasta ${i}
 done
