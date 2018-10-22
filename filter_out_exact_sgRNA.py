@@ -13,23 +13,23 @@ from itertools import product
 
 # Load ChIP peaks
 filename = '/data/crispri_hamming/oct4_chip_flanking.fa'
-seqs = [rec for rec in SeqIO.parse(filename,'fasta')]
-Npeaks = len(seqs)
+peaks = [rec for rec in SeqIO.parse(filename,'fasta')]
+Npeaks = len(peaks)
 has_guide = np.zeros(Npeaks,dtype=bool)
-Lpeak = len(seqs[0]) - 1
+Lpeak = len(peaks[0]) - 1
 
 # Load output of Ali's GG-finding file
 guide_seqs = []
 repeats = []
-for (i,rec) in enumerate(seqs):
+for (i,rec) in enumerate(peaks):
     # Use positive lookahead to search through all matches on + strand
     pam_sites_plus = list(product([m.start() for m in re.finditer('(?=GG)',str(rec.seq))],'+'))
     # Combine with the reverse complement to search through on - strand
     revcomp = str(rec.reverse_complement().seq)
     pam_sites_minus = list(product([m.start() for m in re.finditer('(?=GG)',revcomp)],'-'))
     # Filter through ones that have 20 flanking positions
-    pam_sites = [s for s in pam_sites_plus if s > 19]
-    pam_sites = pam_sites + [s for s in pam_sites_minus if s > Lpeak - 19]
+    pam_sites = [s for s in pam_sites_plus if s[0] > 19]
+    pam_sites = pam_sites + [s for s in pam_sites_minus if s[0] > 19]
     for s in pam_sites:
         strand = s[1]; s = s[0]
         chr_name = get_peak_chromosome(rec.name)
@@ -43,18 +43,18 @@ for (i,rec) in enumerate(seqs):
             peak_locus = get_peak_location(rec.name)[1]
             new_locus = peak_locus - s + 21
             newID = ':'.join((chr_name,str(new_locus),'-'))
+            sequence = revcomp[s-21:s-1]
             
         if len(sequence) == 0:
             break
         # Check for unique entries
         if newID not in [guide.id for guide in guide_seqs]:
             if strand == '+':
-                sequence = data=rec.seq[s-21:s-1]
+                sequence = rec.seq[s-21:s-1]
                 newrec = SeqRecord.SeqRecord( seq = sequence, id = newID, description = rec.name )
             elif strand == '-':
                 sequence = Seq.Seq( data=revcomp[s-21:s-1] )
                 newrec_rc = SeqRecord.SeqRecord( seq = sequence )
-                newrec = newrec_rc.reverse_complement()
                 newrec.id = newID
                 newrec.description = rec.name
             # Generate a SeqRecord
@@ -67,11 +67,12 @@ for (i,rec) in enumerate(seqs):
                     seq = rec.seq[s-21:s-1],
                     id = newID,
                     description = rec.name) )
-
+    print "Done with ", i
 
 print float(has_guide.sum()) / Npeaks
 
 SeqIO.write(guide_seqs,'/data/crispri_hamming/sgRNA_unique.fasta','fasta')
+#0.90838375108
 
 def get_peak_location(name):
     start = name.split(':')[1]
