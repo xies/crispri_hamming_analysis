@@ -39,11 +39,11 @@ for rec in seqs:
             guide_seqs.append( SeqRecord.SeqRecord(
                     seq = sequence,
                     id = newID,
-                    name = rec.name) )
+                    description = rec.name) )
         else:
             repeats.append( SeqRecord.SeqRecord(
                     seq = rec.seq[s-21:s-1],
                     id = newID,
-                    name = rec.name) )
+                    description = rec.name) )
 
 SeqIO.write(guide_seqs,'/data/crispri_hamming/sgRNA_unique.fasta','fasta')
