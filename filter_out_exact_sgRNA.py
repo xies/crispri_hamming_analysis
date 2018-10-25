@@ -30,6 +30,7 @@ for (i,rec) in enumerate(peaks):
     # Filter through ones that have 20 flanking positions
     pam_sites = [s for s in pam_sites_plus if s[0] > 19]
     pam_sites = pam_sites + [s for s in pam_sites_minus if s[0] > 19]
+    
     for s in pam_sites:
         strand = s[1]; s = s[0]
         chr_name = get_peak_chromosome(rec.name)
@@ -42,26 +43,28 @@ for (i,rec) in enumerate(peaks):
         else:
             peak_locus = get_peak_location(rec.name)[1]
             new_locus = peak_locus - s + 21
-            newID = ':'.join((chr_name,str(new_locus),'-'))
             sequence = revcomp[s-21:s-1]
+            newID = ':'.join((chr_name,str(new_locus),'-'))
             
         if len(sequence) == 0:
-            break
-        # Check for unique entries
+            continue
+        
+        # Check for unique entries via matching .id
         if newID not in [guide.id for guide in guide_seqs]:
             if strand == '+':
                 sequence = rec.seq[s-21:s-1]
                 newrec = SeqRecord.SeqRecord( seq = sequence, id = newID, description = rec.name )
             elif strand == '-':
                 sequence = Seq.Seq( data=revcomp[s-21:s-1] )
-                newrec_rc = SeqRecord.SeqRecord( seq = sequence )
+                newrec = SeqRecord.SeqRecord( seq = sequence )
                 newrec.id = newID
                 newrec.description = rec.name
-            # Generate a SeqRecord
-            guide_seqs.append( newrec)
+            # Append to the list
+            guide_seqs.append(newrec)
             # note that this peak has a guide
             has_guide[i] = True
         else:
+            # Note as a repeated guide
             has_guide[i] = True
             repeats.append( SeqRecord.SeqRecord(
                     seq = rec.seq[s-21:s-1],

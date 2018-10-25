@@ -30,8 +30,9 @@ index = 0
         
 #min_distances = D.min()
 
-bins = range( int(D.max()) +1)
-plt.hist(D,bins=bins, normed=True, cumulative=True, histtype='step',align='mid')
+plt.figure()
+bins = range( int(D.max()) +2)
+plt.hist(D,bins=bins, normed=True, cumulative=False, histtype='bar',align='left')
 plt.xlabel('Minimum mismatches')
 plt.ylabel('CDF')
 
