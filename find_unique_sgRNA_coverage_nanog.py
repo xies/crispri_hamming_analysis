@@ -13,10 +13,7 @@ from Bio import SeqIO, SeqRecord
 from itertools import count, izip, product
 
 # Load ChIP peaks
-filename = '/data/crispri_hamming/oct4_chip_flanking.fa'
-peaks = [rec for rec in SeqIO.parse(filename,'fasta')]
-Npeaks = len(peaks)
-
+0
 # Merge ChIP peaks that are within 75bp
 
 #guide_window = 75
@@ -49,7 +46,7 @@ Npeaks = len(peaks)
         
     
 # Load sgRNA seqs
-filename = '/data/crispri_hamming/sgRNA_unique.fasta'
+filename = '/data/crispri_hamming/nanog/sgRNA_unique.fasta'
 guides = [rec for rec in SeqIO.parse(filename,'fasta')]
 Nguides = len(guides)
 # Fix the sequence name
@@ -57,7 +54,7 @@ for g in guides:
     g.name = get_peak_name(g.description)
 
 # Load closest hamming distance
-filename = '/data/crispri_hamming/big_distance_matrix.csv'
+filename = '/data/crispri_hamming/nanog/big_distance_matrix.csv'
 D = np.loadtxt(filename,delimiter=',')
 
 # Go through all peaks and find the 'most unique' guide
