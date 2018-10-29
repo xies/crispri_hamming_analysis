@@ -12,8 +12,7 @@ import pandas as pd
 from Bio import SeqIO
 from itertools import count, izip
 
-filename = '/data/crispri_hamming/big_distance_matrix.csv'
-Dists = np.zeros(19172)
+filename = '/data/crispri_hamming/nanog/big_distance_matrix.csv'
 Dists = np.loadtxt(filename,delimiter=',')
 
 D = Dists[:,0]
@@ -32,10 +31,9 @@ index = 0
 
 plt.figure()
 bins = range( int(D.max()) +2)
-plt.hist(D,bins=bins, normed=True, cumulative=False, histtype='bar',align='left')
+plt.hist(D,bins=bins, normed=True, cumulative=True, histtype='bar',align='left')
 plt.xlabel('Minimum mismatches')
 plt.ylabel('CDF')
-
 
 # Check manually for exact matches
 filename = '/data/ForMimi/AllSgRNAsOct4'
@@ -50,3 +48,4 @@ for (i, matching_pair) in izip(count(), izip(zeros,matches)):
                str(seqs[matching_pair[0]].seq), str(seqs[matching_pair[1]].seq) ))
 df = pd.DataFrame(df)
 df.to_csv('/data/crispri_hamming/exact_matches.txt',sep='\t')
+

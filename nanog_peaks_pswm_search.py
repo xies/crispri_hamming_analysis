@@ -13,7 +13,7 @@ from Bio import SeqIO, motifs, SeqRecord
 from Bio.Alphabet.IUPAC import IUPACUnambiguousDNA
 from timeit import default_timer
 
-filename = '/data/crispri_hamming/nanog_chip_peaks.fa'
+filename = '/data/crispri_hamming/nanog/nanog_chip_peaks.fa'
 peaks = [rec for rec in SeqIO.parse(filename,'fasta')]
 for rec in peaks:
     rec.seq.alphabet = IUPACUnambiguousDNA()
@@ -22,7 +22,7 @@ has_guide = np.zeros(Npeaks,dtype=bool)
 Lpeak = len(peaks[0])
 
 # Load NANOG PWM and rewrite into JASPAR format
-filename = '/data/crispri_hamming/nanog_GSE11724.jaspar'
+filename = '/data/crispri_hamming/nanog/nanog_GSE11724.jaspar'
 with open(filename)as fh:
     m = [m for m in motifs.parse(fh, "jaspar")]
 pwm = m[0]
@@ -40,33 +40,48 @@ flanking_size = 30
 
 tic = default_timer()
 sites = []
-for ts in peaks:
-    # DO NOT use 'both=True' because negative indexing on pssm.search is broken AF
-    chr_name = get_peak_chromosome(ts.name)
-    peak_start = get_peak_location(ts.name)[0]
-    peak_end = get_peak_location(ts.name)[1]
+for s in peaks:
+    newrec = s[165:235]
+    peak_start = get_peak_location(s.name)[0]
+    chr_name = get_peak_chromosome(s.name)
+    site_start = peak_start + 200 - Lmotif/2 - flanking_size
+    site_end = peak_start + + 200 + Lmotif/2 + flanking_size
+    newID = ':'.join((chr_name, '-'.join(( str(site_start), str(site_end))) ))
+    newrec.id = newID
+    sites.append(newrec)
     
-    for p,s in pssm.search(ts.seq,threshold=threshold_80perc,both=False): 
-        if p >= flanking_size & p < Lpeak - Lmotif - flanking_size:
-            # Write the site of the hit as the new locus
-            seq = ts.seq[p - flanking_size : p+flanking_size+Lmotif]
-            new_locus = p + peak_start
-            newID = ':'.join((chr_name,str(new_locus),'+'))
-            newrec = SeqRecord.SeqRecord( seq = seq, id = newID, description = ts.name )
-            sites.append( newrec )
-    
-    rc = ts.reverse_complement()
-    for p,s in pssm.search(rc.seq,threshold=threshold_80perc,both=False):
-        if p >= flanking_size & p < Lpeak - Lmotif - flanking_size:
-            # Write the "head" of the motif as the new locus
-            seq = rc.seq[p - flanking_size : p+flanking_size+Lmotif]
-            new_locus = peak_end - p
-            newID = ':'.join((chr_name,str(new_locus),'-'))
-            newrec = SeqRecord.SeqRecord( seq = seq, id = newID, description = ts.name )
-            sites.append( newrec )
+#sites = [p[165:235] for p in peaks]
+
+# NOT DOING THIS FOR NANOG
+#for ts in peaks:
+#    # DO NOT use 'both=True' because negative indexing on pssm.search is broken AF
+#    chr_name = get_peak_chromosome(ts.name)
+#    peak_start = get_peak_location(ts.name)[0]
+#    peak_end = get_peak_location(ts.name)[1]
+#    
+#    for p,s in pssm.search(ts.seq,threshold=threshold_80perc,both=False): 
+#        if p >= flanking_size & p < Lpeak - Lmotif - flanking_size:
+#            # Write the site of the hit as the new locus
+#            seq = ts.seq[p - flanking_size : p+flanking_size+Lmotif]
+#            new_locus = p + peak_start
+#            newID = ':'.join((chr_name,str(new_locus),'+'))
+#            newrec = SeqRecord.SeqRecord( seq = seq, id = newID, description = ts.name )
+#            sites.append( newrec )
+#    
+#    rc = ts.reverse_complement()
+#    for p,s in pssm.search(rc.seq,threshold=threshold_80perc,both=False):
+#        if p >= flanking_size & p < Lpeak - Lmotif - flanking_size:
+#            # Write the "head" of the motif as the new locus
+#            seq = rc.seq[p - flanking_size : p+flanking_size+Lmotif]
+#            new_locus = peak_end - p
+#            newID = ':'.join((chr_name,str(new_locus),'-'))
+#            newrec = SeqRecord.SeqRecord( seq = seq, id = newID, description = ts.name )
+#            sites.append( newrec )
 
 toc = default_timer()
-SeqIO.write(sites,'/data/crispri_hamming/nanog_sites.fasta','fasta')
+SeqIO.write(sites,'/data/crispri_hamming/nanog/nanog_sites.fasta','fasta')
+
+
 
 def get_peak_location(name):
     start = name.split(':')[1]
