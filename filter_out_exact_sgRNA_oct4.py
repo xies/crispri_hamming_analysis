@@ -12,7 +12,7 @@ from Bio import SeqIO, SeqRecord, Seq
 from itertools import product
 
 # Load ChIP peaks
-filename = '/data/crispri_hamming/oct4_chip_flanking.fa'
+filename = '/data/crispri_hamming/oct4/oct4_chip_flanking.fa'
 peaks = [rec for rec in SeqIO.parse(filename,'fasta')]
 Npeaks = len(peaks)
 has_guide = np.zeros(Npeaks,dtype=bool)
@@ -75,7 +75,7 @@ for (i,rec) in enumerate(peaks):
 print float(has_guide.sum()) / Npeaks
 
 SeqIO.write(guide_seqs,'/data/crispri_hamming/sgRNA_unique.fasta','fasta')
-#0.90838375108
+#0.983146067416
 
 def get_peak_location(name):
     start = name.split(':')[1]

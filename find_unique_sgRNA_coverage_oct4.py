@@ -12,7 +12,7 @@ from Bio import SeqIO, SeqRecord
 from itertools import count, izip, product
 
 # Load ChIP peaks
-filename = '/data/crispri_hamming/oct4_chip_flanking.fa'
+filename = '/data/crispri_hamming/oct4/oct4_chip_flanking.fa'
 peaks = [rec for rec in SeqIO.parse(filename,'fasta')]
 Npeaks = len(peaks)
 
@@ -48,7 +48,7 @@ Npeaks = len(peaks)
         
     
 # Load sgRNA seqs
-filename = '/data/crispri_hamming/sgRNA_unique.fasta'
+filename = '/data/crispri_hamming/oct4/sgRNA_unique.fasta'
 guides = [rec for rec in SeqIO.parse(filename,'fasta')]
 Nguides = len(guides)
 # Fix the sequence name
@@ -56,7 +56,7 @@ for g in guides:
     g.name = get_peak_name(g.description)
 
 # Load closest hamming distance
-filename = '/data/crispri_hamming/big_distance_matrix.csv'
+filename = '/data/crispri_hamming/oct4/big_distance_matrix.csv'
 D = np.loadtxt(filename,delimiter=',')
 
 # Go through all peaks and find the 'most unique' guide
@@ -76,6 +76,7 @@ N = outs[0];
 plt.bar(bins[:-1],1-N);
 plt.xlabel('Minimum mismatches to other sgRNAs requred');
 plt.ylabel('Fraction of ChIP peaks with valid sgRNA')
+np.savetxt('/data/crispri_hamming/oct4/peak_coverage.csv',N)
 
 def seqrec2df(peaks):
     # Parse the nameing convention of the ChIP peaks into a machine-readable dataframe

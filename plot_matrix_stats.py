@@ -12,6 +12,11 @@ import pandas as pd
 from Bio import SeqIO
 from itertools import count, izip
 
+# Load Oct4
+filename = '/data/crispri_hamming/oct4/big_distance_matrix.csv'
+Dists = np.loadtxt(filename,delimiter=',')
+
+# Load Nanog
 filename = '/data/crispri_hamming/nanog/big_distance_matrix.csv'
 Dists = np.loadtxt(filename,delimiter=',')
 
@@ -29,11 +34,14 @@ index = 0
         
 #min_distances = D.min()
 
-plt.figure()
 bins = range( int(D.max()) +2)
-plt.hist(D,bins=bins, normed=True, cumulative=True, histtype='bar',align='left')
+outs = plt.hist(D,bins=bins, normed=True, cumulative=True)
+N = outs[0]
+plt.figure()
+plt.bar(bins[:-1],1-N)
 plt.xlabel('Minimum mismatches')
 plt.ylabel('CDF')
+
 
 # Check manually for exact matches
 filename = '/data/ForMimi/AllSgRNAsOct4'

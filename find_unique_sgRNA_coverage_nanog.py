@@ -13,38 +13,12 @@ from Bio import SeqIO, SeqRecord
 from itertools import count, izip, product
 
 # Load ChIP peaks
-0
-# Merge ChIP peaks that are within 75bp
+filename = '/data/crispri_hamming/nanog/nanog_sites.fasta'
+peaks = [rec for rec in SeqIO.parse(filename,'fasta')]
+Npeaks = len(peaks)
+has_guide = np.zeros(Npeaks,dtype=bool)
+Lpeak = len(peaks[0]) - 1
 
-#guide_window = 75
-#
-#df = seqrec2df(peaks)
-#chromosomes = np.unique(df['chromosome'])
-#unique_peaks = pd.DataFrame()
-#for c in chromosomes:
-#    this_chrom = df[ df['chromosome'] == c]
-#    
-#    if len(this_chrom) > 1: # skip if there's only one
-#        
-#        intervals = zip(this_chrom['start'],this_chrom['end'])
-#        # Build the index of pairs
-#        II = xrange(len(intervals))
-#        index = list(product(II,II))
-#        
-#        D = np.zeros((len(II),len(II)),dtype=bool)
-#        	# Iterate through pairs of intervals using itertools
-#        for i, intervPair in izip(count(), product(intervals,intervals)):
-#        		ind = index[i]
-#        		# Only check one side of diagonal
-#        		if ind[0] > ind[1]:
-#        			D[ind[0],ind[1]] = overlap(intervPair[0],intervPair[1]) > 20
-#	df.loc[df.chromosome == c, 'unique'] = ~np.any(D,axis=0)
-##    for (i,I) in enumerate(intervals):
-##        j = intervals[j]
-##        while 
-            
-        
-    
 # Load sgRNA seqs
 filename = '/data/crispri_hamming/nanog/sgRNA_unique.fasta'
 guides = [rec for rec in SeqIO.parse(filename,'fasta')]
@@ -74,6 +48,7 @@ N = outs[0];
 plt.bar(bins[:-1],1-N);
 plt.xlabel('Minimum mismatches to other sgRNAs requred');
 plt.ylabel('Fraction of ChIP peaks with valid sgRNA')
+np.savetxt('/data/crispri_hamming/nanog/peak_coverage.csv',N)
 
 def seqrec2df(peaks):
     # Parse the nameing convention of the ChIP peaks into a machine-readable dataframe
